@@ -28,10 +28,11 @@ export const Home: React.FC = () => {
             // 1. Calculate Hash of TC (Lookup Key)
             const hashedTc = hashTC(tc);
 
-            // 2. Fetch the STATIC JSON file directly
+            // 2. Fetch the STATIC JSON file using dynamic BASE_URL
             // Note: In Vite, 'public' folder is served at root.
-            // So 'public/data/foo.json' is accessible at '/data/foo.json'
-            const response = await fetch(`/data/${dataId}.json`);
+            // On GitHub Pages, we are at /Desteklemeler/, so we need import.meta.env.BASE_URL
+            const baseUrl = import.meta.env.BASE_URL; // e.g. "/" or "/Desteklemeler/"
+            const response = await fetch(`${baseUrl}data/${dataId}.json`);
 
             if (!response.ok) {
                 if (response.status === 404) {
