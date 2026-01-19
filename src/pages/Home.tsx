@@ -74,9 +74,19 @@ export const Home: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
             <div className="max-w-3xl w-full bg-white rounded-lg shadow-xl overflow-hidden">
-                <header className="bg-red-700 text-white p-6 text-center">
-                    <h1 className="text-2xl font-bold uppercase">Muğla İl Tarım ve Orman Müdürlüğü</h1>
-                    <h2 className="text-lg mt-2 font-medium">Çiftçi Destekleme Sorgulama Sistemi</h2>
+                <header className="bg-red-700 text-white p-6 flex flex-col md:flex-row items-center justify-center gap-6 text-center">
+                    <img
+                        src="https://www.tarimorman.gov.tr/IcerikResimleri/BakanlikLogolariPng/LogoKirmizi_Tarim.png"
+                        alt="T.C. Tarım ve Orman Bakanlığı Logo"
+                        className="h-24 w-auto bg-white rounded-full p-2 shadow-lg"
+                    />
+                    <div className="flex flex-col items-center md:items-start">
+                        <h1 className="text-xl md:text-2xl font-bold uppercase leading-tight tracking-wide">
+                            T.C. MUĞLA VALİLİĞİ<br />
+                            İL TARIM VE ORMAN MÜDÜRLÜĞÜ
+                        </h1>
+                        <h2 className="text-lg mt-2 font-medium text-red-100">Çiftçi Destekleme Sorgulama Sistemi</h2>
+                    </div>
                 </header>
 
                 <div className="p-8">
