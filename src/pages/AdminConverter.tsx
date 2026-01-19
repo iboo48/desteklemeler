@@ -444,11 +444,51 @@ export const AdminConverter: React.FC = () => {
             {/* INFO GUIDE SECTION */}
             <div className="mt-12 bg-yellow-50 border border-yellow-200 rounded p-6 text-sm text-gray-700">
                 <h3 className="font-bold text-lg mb-4 text-yellow-800 flex items-center">
-                    <span className="text-2xl mr-2">💡</span> Yönetici Bilgi Notları
+                    <span className="text-2xl mr-2">💡</span> Yönetici Bilgi Notları: Yeni Destek Nasıl Eklenir?
                 </h3>
-                <p>
-                    Sorgulama dosyasını <b>public/data/</b> altına ekleyip <b>src/config.ts</b> dosyasına tanımlamanız yeterlidir.
-                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 className="font-bold border-b border-yellow-300 pb-1 mb-2">1. Bu JSON Dosyası Nereye Yüklenecek?</h4>
+                        <p className="mb-2">
+                            İndirdiğiniz dosyayı projenin içindeki şu klasöre atmanız gerekmektedir:
+                        </p>
+                        <code className="block bg-black text-white p-2 rounded mb-2 font-mono">
+                            public/data/
+                        </code>
+                        <p className="text-xs text-gray-500">
+                            Örneğin dosya adı <b>buzagi2025.json</b> ise, tam yol şöyle olmalıdır:<br />
+                            <code>.../Desteklemeler/public/data/buzagi2025.json</code>
+                        </p>
+                    </div>
+
+                    <div>
+                        <h4 className="font-bold border-b border-yellow-300 pb-1 mb-2">2. Sorgulama Listesine Nasıl Eklenir?</h4>
+                        <p className="mb-2">
+                            Yeni desteğin listede görünmesi için şu dosyayı düzenlemelisiniz:
+                        </p>
+                        <code className="block bg-black text-white p-2 rounded mb-2 font-mono">
+                            src/config.ts
+                        </code>
+                        <p className="mb-2">Dosyayı açıp listeye şunun gibi ekleme yapın:</p>
+                        <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
+                            {`{ id: 'json_dosya_ismi', label: 'Ekranda Görünecek İsim' },`}
+                        </pre>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Önemli: <b>id</b> kısmı, JSON dosyasının ismiyle (uzantısız) birebir aynı olmalıdır.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-yellow-200">
+                    <p className="font-bold">Örnek Senaryo:</p>
+                    <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+                        <li>Admin panelinden dosyayı <b>arilik2026</b> ID'si ile oluşturdunuz.</li>
+                        <li>İnen <b>arilik2026.json</b> dosyasını <b>public/data/</b> altına attınız.</li>
+                        <li><b>src/config.ts</b> dosyasına gidip <code>{`{ id: 'arilik2026', label: '2026 Arılık Desteği' }`}</code> satırını eklediniz.</li>
+                        <li>Siteyi güncellediniz (Build & Push). Artık yayında!</li>
+                    </ul>
+                </div>
             </div>
         </div>
     );

@@ -133,7 +133,7 @@ export const Home: React.FC = () => {
                                 onChange={(e) => setTc(e.target.value.replace(/\D/g, ''))} // only numbers
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                * Bilgileriniz şifrelenerek sorgulanmaktadır (KVKK uyumlu).
+                                * Kişisel verilerinizin güvenliği için T.C. Kimlik Numaranız şifrelenerek sorgulanmaktadır.
                             </p>
                         </div>
 
