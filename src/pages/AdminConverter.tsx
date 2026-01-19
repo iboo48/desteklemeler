@@ -26,7 +26,7 @@ export const AdminConverter: React.FC = () => {
     const [useDoubleHeader, setUseDoubleHeader] = useState<boolean>(false);
 
     // Filter / Format / Mapping State
-    const [inspectionData, setInspectionData] = useState<{ col: string; val: string; index: number }[] | null>(null);
+    // const [inspectionData, setInspectionData] = useState<{ col: string; val: string; index: number }[] | null>(null);
     const [detectedHeaders, setDetectedHeaders] = useState<string[]>([]);
     const [currencyCols, setCurrencyCols] = useState<Set<number>>(new Set()); // Indexes of columns to format as Currency
     const [statusMsg, setStatusMsg] = useState('');
@@ -43,7 +43,7 @@ export const AdminConverter: React.FC = () => {
 
             setJsonOutput(null);
             setStatusMsg('');
-            setInspectionData(null);
+            // setInspectionData(null);
             setDetectedHeaders([]);
             setCurrencyCols(new Set());
             setTcColLetter('');
@@ -127,15 +127,15 @@ export const AdminConverter: React.FC = () => {
                 const row = rawRows[rowToShowIndex];
                 if (!row || !Array.isArray(row)) {
                     alert("Seçilen satır boş veya geçersiz.");
-                    setInspectionData(null);
+                    // setInspectionData(null);
                     return;
                 }
 
-                const map = row.map((val: any, idx: number) => {
-                    const letter = XLSX.utils.encode_col(idx);
-                    return { col: letter, val: String(val ?? '(boş)'), index: idx };
-                });
-                setInspectionData(map);
+                // const map = row.map((val: any, idx: number) => {
+                //     const letter = XLSX.utils.encode_col(idx);
+                //     return { col: letter, val: String(val ?? '(boş)'), index: idx };
+                // });
+                // setInspectionData(map);
 
                 // Full Headers Logic for "Currency Column Selection"
                 // Must simulate the double header logic if checked
