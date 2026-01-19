@@ -21,8 +21,8 @@ export const Home: React.FC = () => {
                 throw new Error('Lütfen tüm alanları doldurunuz.');
             }
 
-            if (tc.length !== 11) {
-                throw new Error('T.C. Kimlik No 11 haneli olmalıdır.');
+            if (tc.length !== 11 && tc.length !== 10) {
+                throw new Error('T.C. (11) veya Vergi No (10) giriniz.');
             }
 
             // 1. Calculate Hash of TC (Lookup Key)
@@ -123,17 +123,17 @@ export const Home: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">T.C. Kimlik Numaranız</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">T.C. Kimlik / Vergi Numarası</label>
                             <input
-                                type="password"
+                                type="text"
                                 className="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 p-2 border"
-                                placeholder="***********"
+                                placeholder="T.C. (11) veya Vergi No (10)"
                                 maxLength={11}
                                 value={tc}
                                 onChange={(e) => setTc(e.target.value.replace(/\D/g, ''))} // only numbers
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                * Kişisel verilerinizin güvenliği T.C. Kimlik Numaranız şifrelenerek korunmaktadır.
+                                * Bilgileriniz şifrelenerek sorgulanmaktadır (KVKK uyumlu).
                             </p>
                         </div>
 
