@@ -153,48 +153,55 @@ export const Home: React.FC = () => {
                     )}
 
                     {result && (
-                        <div className="mt-8 animate-fade-in">
+                        <div className="mt-8 animate-fade-in space-y-8">
                             <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
                                 {SUPPORT_TYPES.find(t => t.id === dataId)?.label || 'Sorgulama Sonucu'}
                             </h3>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {Object.entries(result).map(([key, value]) => {
-                                            // 1. FILTERING:
-                                            // 'tcHash' is internal.
-                                            // 'Sıra No' is usually redundant but okay.
-                                            // Empty keys.
-                                            // 1. FILTERING:
-                                            // 'tcHash' is internal.
-                                            // Empty keys.
-                                            // Empty values (null, undefined, empty string)
-                                            if (
-                                                key === 'tcHash' ||
-                                                key.trim() === '' ||
-                                                value === null ||
-                                                value === undefined ||
-                                                String(value).trim() === ''
-                                            ) return null;
 
-                                            // NO AUTOMATIC FORMATTING
-                                            // Formatting is done in AdminConverter manually by user selection.
-                                            // Here we just display whatever is in the JSON.
-                                            let displayValue = String(value);
+                            {(Array.isArray(result) ? result : [result]).map((item, index) => (
+                                <div key={index} className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                    {(Array.isArray(result) && result.length > 1) && (
+                                        <div className="bg-gray-50 px-4 py-2 border-b text-red-800 font-bold text-sm">
+                                            {item['_title']
+                                                ? `${item['_title']}`
+                                                : `Kayıt #${index + 1} (${item['Adı Soyadı'] || item['Sahibi'] || ''})`}
+                                        </div>
+                                    )}
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full divide-y divide-gray-200 text-sm">
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {Object.entries(item).map(([key, value]) => {
+                                                    // 1. FILTERING:
+                                                    // 'tcHash' is internal.
+                                                    // Empty keys.
+                                                    // Empty values (null, undefined, empty string)
+                                                    if (
+                                                        key === 'tcHash' ||
+                                                        key === '_title' ||
+                                                        key.trim() === '' ||
+                                                        value === null ||
+                                                        value === undefined ||
+                                                        String(value).trim() === ''
+                                                    ) return null;
 
-                                            // Just basic check for null/undefined if filtered above didn't catch it
-                                            if (value === null || value === undefined) displayValue = '';
+                                                    // NO AUTOMATIC FORMATTING
+                                                    let displayValue = String(value);
 
-                                            return (
-                                                <tr key={key}>
-                                                    <td className="px-4 py-2 font-medium text-gray-900 bg-gray-50 capitalize w-1/3 border-r">{key}</td>
-                                                    <td className="px-4 py-2 text-gray-700">{displayValue}</td>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                    // Just basic check for null/undefined
+                                                    if (value === null || value === undefined) displayValue = '';
+
+                                                    return (
+                                                        <tr key={key}>
+                                                            <td className="px-4 py-2 font-medium text-gray-900 bg-gray-50 capitalize w-1/3 border-r">{key}</td>
+                                                            <td className="px-4 py-2 text-gray-700">{displayValue}</td>
+                                                        </tr>
+                                                    )
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>

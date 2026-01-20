@@ -31,6 +31,7 @@ export const AdminConverter: React.FC = () => {
     const [statusMsg, setStatusMsg] = useState('');
     const [maskedCols, setMaskedCols] = useState<Set<number>>(new Set());
     const [ignoredCols, setIgnoredCols] = useState<Set<number>>(new Set());
+    const [titleCol, setTitleCol] = useState<number | null>(null);
 
     // Helper: Mask Name (Ali Veli -> Al* Ve*)
     const maskName = (fullName: string) => {
@@ -57,6 +58,7 @@ export const AdminConverter: React.FC = () => {
             setCurrencyCols(new Set());
             setMaskedCols(new Set());
             setIgnoredCols(new Set());
+            setTitleCol(null);
             setTcColLetter('');
             setVknColLetter('');
         }
@@ -133,6 +135,14 @@ export const AdminConverter: React.FC = () => {
         setIgnoredCols(newSet);
     };
 
+    const toggleTitleCol = (index: number) => {
+        if (titleCol === index) {
+            setTitleCol(null);
+        } else {
+            setTitleCol(index);
+        }
+    };
+
     const inspectFile = () => {
         if (files.length === 0) return;
 
@@ -167,6 +177,11 @@ export const AdminConverter: React.FC = () => {
 
     // Helper to process content of one file
     const processContent = (bstr: any, encryptedMap: EncryptedOutput, tcIndex: number, vknIndex: number): number => {
+        // Capture titleCol in closure scope or pass it? It uses component state which is not accessible in this helper efficiently if passed to worker/promise.
+        // Wait, processContent is inside the component, so it can access 'titleCol'.
+        // But let's check if 'titleCol' is stale. It should be fine as it's called from processFile which is triggered by button click.
+        const currentTitleCol = titleCol;
+
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
@@ -235,11 +250,38 @@ export const AdminConverter: React.FC = () => {
                 }
 
                 obj[cleanHeader] = val;
+
+                // 5. TITLE EXTRACTION
+                if (colIdx === currentTitleCol) {
+                    obj['_title'] = String(val).trim();
+                }
             });
 
             const lookupKey = hashTC(masterKey);
-            const plainText = JSON.stringify(obj);
-            encryptedMap[lookupKey] = plainText;
+
+            // DUPLICATE HANDLING: Support multiple records for same TC
+            if (encryptedMap[lookupKey]) {
+                try {
+                    const existing = JSON.parse(encryptedMap[lookupKey]);
+                    let newData;
+                    if (Array.isArray(existing)) {
+                        existing.push(obj);
+                        newData = existing;
+                    } else {
+                        // Convert single object to array and add new one
+                        newData = [existing, obj];
+                    }
+                    encryptedMap[lookupKey] = JSON.stringify(newData);
+                } catch (e) {
+                    // Fallback if parse error (should unlikely happen), just overwrite
+                    console.error("Merge error", e);
+                    encryptedMap[lookupKey] = JSON.stringify(obj);
+                }
+            } else {
+                // First record for this TC
+                encryptedMap[lookupKey] = JSON.stringify(obj);
+            }
+
             count++;
         }
         return count;
@@ -385,6 +427,33 @@ export const AdminConverter: React.FC = () => {
                                 (Bu veri gizlilik gereği JSON içeriğine kaydedilmez, sadece sorgulama anahtarı olur).
                             </p>
 
+                            <div className="mb-4 bg-blue-50 p-4 rounded border border-blue-200 text-sm space-y-2">
+                                <h4 className="font-bold text-blue-900 border-b border-blue-300 pb-1 mb-2">Seçenekler Rehberi</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="bg-red-600 text-white text-[10px] px-2 py-1 rounded border">TC</span>
+                                        <span className="bg-blue-600 text-white text-[10px] px-2 py-1 rounded border">VKN</span>
+                                        <span className="text-gray-700 font-medium">= Sorgulama Anahtarı (Gizli tutulur)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-green-700 font-bold">Para Birimi (₺)</span>
+                                        <span className="text-gray-600">= Sayısal değerleri para birimi formatına çevirir (örn: 1.234,56 ₺)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-purple-700 font-bold">Maskele (Ad Soyad)</span>
+                                        <span className="text-gray-600">= İsimleri maskeler (örn: AL** VE**)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-red-700 font-bold line-through">Yoksay (Sil)</span>
+                                        <span className="text-gray-600">= Bu sütun JSON dosyasına eklenmez</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-orange-700 font-bold">Başlık Yap (İşletme No)</span>
+                                        <span className="text-gray-600">= Kart başlığı olarak kullanılır (örn: Kişinin birden fazla işletmesi varsa başlıklardan ayırabilir)</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[500px] overflow-y-auto border p-2 rounded bg-gray-50">
                                 {detectedHeaders.map((header, idx) => {
                                     const colLetter = XLSX.utils.encode_col(idx);
@@ -452,7 +521,7 @@ export const AdminConverter: React.FC = () => {
                                                         className="w-4 h-4 text-purple-600 rounded cursor-pointer"
                                                     />
                                                     <label htmlFor={`mask-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${maskedCols.has(idx) ? 'text-purple-700' : 'text-gray-500'}`}>
-                                                        {maskedCols.has(idx) ? 'GİZLİ (KVKK)' : 'Maskele'}
+                                                        {maskedCols.has(idx) ? 'GİZLİ (KVKK)' : 'Maskele(Ad Soyad)'}
                                                     </label>
                                                 </div>
                                                 <div className="flex items-center">
@@ -466,6 +535,19 @@ export const AdminConverter: React.FC = () => {
                                                     />
                                                     <label htmlFor={`ignore-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${ignoredCols.has(idx) ? 'text-red-700 line-through' : 'text-gray-500'}`}>
                                                         {ignoredCols.has(idx) ? 'YOKSAYILDI' : 'Yoksay (Sil)'}
+                                                    </label>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`title-${idx}`}
+                                                        checked={titleCol === idx}
+                                                        onChange={() => toggleTitleCol(idx)}
+                                                        disabled={isTc || isVkn}
+                                                        className="w-4 h-4 text-orange-600 rounded cursor-pointer"
+                                                    />
+                                                    <label htmlFor={`title-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${titleCol === idx ? 'text-orange-700' : 'text-gray-500'}`}>
+                                                        {titleCol === idx ? 'BAŞLIK ETİKETİ' : 'Başlık Yap(İşletme No)'}
                                                     </label>
                                                 </div>
                                             </div>
