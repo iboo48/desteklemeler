@@ -29,6 +29,16 @@ export const AdminConverter: React.FC = () => {
     const [detectedHeaders, setDetectedHeaders] = useState<string[]>([]);
     const [currencyCols, setCurrencyCols] = useState<Set<number>>(new Set());
     const [statusMsg, setStatusMsg] = useState('');
+    const [maskedCols, setMaskedCols] = useState<Set<number>>(new Set());
+    const [ignoredCols, setIgnoredCols] = useState<Set<number>>(new Set());
+
+    // Helper: Mask Name (Ali Veli -> Al* Ve*)
+    const maskName = (fullName: string) => {
+        return fullName.split(' ').map(word => {
+            if (word.length < 3) return word;
+            return word.substring(0, 2) + '*'.repeat(word.length - 2);
+        }).join(' ');
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -45,6 +55,8 @@ export const AdminConverter: React.FC = () => {
             setStatusMsg(`${selectedFiles.length} dosya seçildi. Başlıkları görmek için önizleme yapın.`);
             setDetectedHeaders([]);
             setCurrencyCols(new Set());
+            setMaskedCols(new Set());
+            setIgnoredCols(new Set());
             setTcColLetter('');
             setVknColLetter('');
         }
@@ -95,8 +107,30 @@ export const AdminConverter: React.FC = () => {
             newSet.delete(index);
         } else {
             newSet.add(index);
+            // Cannot be both currency and masked usually, but let's allow or handle if needed.
         }
         setCurrencyCols(newSet);
+    };
+
+    const toggleMaskedCol = (index: number) => {
+        const newSet = new Set(maskedCols);
+        if (newSet.has(index)) {
+            newSet.delete(index);
+        } else {
+            newSet.add(index);
+            // If masking, perform check on ignored? usually mutually exclusive but user can toggle.
+        }
+        setMaskedCols(newSet);
+    };
+
+    const toggleIgnoredCol = (index: number) => {
+        const newSet = new Set(ignoredCols);
+        if (newSet.has(index)) {
+            newSet.delete(index);
+        } else {
+            newSet.add(index);
+        }
+        setIgnoredCols(newSet);
     };
 
     const inspectFile = () => {
@@ -170,7 +204,8 @@ export const AdminConverter: React.FC = () => {
             headers.forEach((headerName: string, colIdx: number) => {
                 let val = row[colIdx];
 
-                // OPTIMIZATION: Skip empty values
+                // OPTIMIZATION & EXCLUSION: Skip empty values OR Ignored Columns
+                if (ignoredCols.has(colIdx)) return;
                 if (val === undefined || val === null || val === '') return;
                 if (typeof val === 'string' && val.trim() === '') return;
 
@@ -192,6 +227,11 @@ export const AdminConverter: React.FC = () => {
                     } else {
                         val = String(val);
                     }
+                }
+
+                // 4. MASKING (KVKK)
+                if (maskedCols.has(colIdx)) {
+                    val = maskName(String(val));
                 }
 
                 obj[cleanHeader] = val;
@@ -388,18 +428,46 @@ export const AdminConverter: React.FC = () => {
                                                 {header}
                                             </div>
 
-                                            <div className="mt-auto pt-2 border-t flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`curr-${idx}`}
-                                                    checked={isCurrency}
-                                                    onChange={() => toggleCurrencyCol(idx)}
-                                                    disabled={isTc || isVkn}
-                                                    className="w-4 h-4 text-green-600 rounded cursor-pointer"
-                                                />
-                                                <label htmlFor={`curr-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${isCurrency ? 'text-green-700' : 'text-gray-500'}`}>
-                                                    {isCurrency ? 'PARA (₺)' : 'Para Birimi Yap'}
-                                                </label>
+                                            <div className="mt-auto pt-2 border-t flex flex-col gap-1">
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`curr-${idx}`}
+                                                        checked={isCurrency}
+                                                        onChange={() => toggleCurrencyCol(idx)}
+                                                        disabled={isTc || isVkn}
+                                                        className="w-4 h-4 text-green-600 rounded cursor-pointer"
+                                                    />
+                                                    <label htmlFor={`curr-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${isCurrency ? 'text-green-700' : 'text-gray-500'}`}>
+                                                        {isCurrency ? 'PARA (₺)' : 'Para Birimi'}
+                                                    </label>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`mask-${idx}`}
+                                                        checked={maskedCols.has(idx)}
+                                                        onChange={() => toggleMaskedCol(idx)}
+                                                        disabled={isTc || isVkn}
+                                                        className="w-4 h-4 text-purple-600 rounded cursor-pointer"
+                                                    />
+                                                    <label htmlFor={`mask-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${maskedCols.has(idx) ? 'text-purple-700' : 'text-gray-500'}`}>
+                                                        {maskedCols.has(idx) ? 'GİZLİ (KVKK)' : 'Maskele'}
+                                                    </label>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`ignore-${idx}`}
+                                                        checked={ignoredCols.has(idx)}
+                                                        onChange={() => toggleIgnoredCol(idx)}
+                                                        disabled={isTc || isVkn}
+                                                        className="w-4 h-4 text-red-600 rounded cursor-pointer"
+                                                    />
+                                                    <label htmlFor={`ignore-${idx}`} className={`ml-2 text-xs font-bold cursor-pointer ${ignoredCols.has(idx) ? 'text-red-700 line-through' : 'text-gray-500'}`}>
+                                                        {ignoredCols.has(idx) ? 'YOKSAYILDI' : 'Yoksay (Sil)'}
+                                                    </label>
+                                                </div>
                                             </div>
                                         </div>
                                     );

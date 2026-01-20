@@ -154,7 +154,9 @@ export const Home: React.FC = () => {
 
                     {result && (
                         <div className="mt-8 animate-fade-in">
-                            <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Sorgulama Sonucu ({result['Adı Soyadı'] || result['Sahibi'] || 'Detaylar'})</h3>
+                            <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
+                                {SUPPORT_TYPES.find(t => t.id === dataId)?.label || 'Sorgulama Sonucu'}
+                            </h3>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                                     <tbody className="bg-white divide-y divide-gray-200">
