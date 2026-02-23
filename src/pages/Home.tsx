@@ -152,7 +152,7 @@ export const Home: React.FC = () => {
                                 * Kişisel verilerinizin güvenliği için T.C. Kimlik Numaranız şifrelenerek sorgulanmaktadır.
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                                * Bu sistem bilgilendirme amaçlıdır; lütfen kesin sonuçlar için askı listelerini kontrol ediniz.
+                                * Bu sistem bilgilendirme amaçlıdır. Lütfen kesin sonuçlar için askı listelerini kontrol ediniz.
                             </p>
                         </div>
 
