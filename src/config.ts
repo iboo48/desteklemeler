@@ -8,5 +8,5 @@ export interface SupportType {
 export const SUPPORT_TYPES: SupportType[] = [
     //{ id: 'buzagiaski2025_1', label: '2025 Yılı Birinci Dönem Buzağı Desteklemesi Askı Listesi' },
     //{ id: 'kuzuoglakaski2025_1', label: '2025 Yılı Birinci Dönem Küçükbaş Hayvancılık Desteklemeleri Askı Listesi' },
-    { id: 'sutaski2025_1', label: '2025 Yılı Dördüncü Dönem Süt Desteklemeleri Askı Listesi' },
+    { id: 'sutaski2025_4', label: '2025 Yılı Dördüncü Dönem Süt Desteklemeleri Askı Listesi' },
 ];
